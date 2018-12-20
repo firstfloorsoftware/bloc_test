@@ -13,7 +13,7 @@ class UsersBloc implements BlocBase {
   final StreamController<User> _onlineUserController =
       StreamController<User>.broadcast();
   Timer _onlineTimer;
-  Stream<List<User>> get usersStream => _usersController.stream;
+  Stream<List<User>> get users => _usersController.stream;
 
   UsersBloc() {
     UserService().randomUsers(100).then((users) {

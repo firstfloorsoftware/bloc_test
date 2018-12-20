@@ -16,8 +16,8 @@ class UserListItem extends StatelessWidget {
     return BlocProvider<UserBloc>(
         bloc: userBloc,
         child: StreamBuilder(
-            stream: userBloc.userStream,
-            initialData: userBloc.user,
+            initialData: user,
+            stream: userBloc.user,
             builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
               final user = snapshot.data;
               return ListTile(
@@ -34,8 +34,8 @@ class UserListItem extends StatelessWidget {
                                     shape: BoxShape.circle))
                             : null)
                   ]),
-                  leading:
-                      CircleAvatar(backgroundImage: NetworkImage(user.thumbnailUri)),
+                  leading: CircleAvatar(
+                      backgroundImage: NetworkImage(user.thumbnailUri)),
                   trailing: IconButton(
                     icon: user.favorite
                         ? Icon(Icons.favorite, color: Colors.red)
