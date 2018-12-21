@@ -28,9 +28,12 @@ class UsersPage extends StatelessWidget {
                     builder: (BuildContext context,
                         AsyncSnapshot<UserStats> snapshot) {
                       if (snapshot.hasData) {
-                        var stats = snapshot.data;
-                        return Text(
-                            '${stats.count} users, ${stats.online} online',
+                        final stats = snapshot.data;
+                        final String text = stats.count > 0
+                            ? '${stats.count} user${stats.count != 1 ? 's' : ''}, ${stats.online} online'
+                            : 'No users found';
+
+                        return Text(text,
                             style: Theme.of(context)
                                 .textTheme
                                 .body1

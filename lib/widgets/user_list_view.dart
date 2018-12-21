@@ -15,21 +15,14 @@ class UserListView extends StatelessWidget {
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
         }
-        if (snapshot.data.isNotEmpty) {
-          return ListView.separated(
-              itemCount: snapshot.data.length,
-              itemBuilder: (BuildContext context, int index) => UserListItem(
-                    user: snapshot.data[index],
-                    key: Key(snapshot.data[index].id),
-                  ),
-              separatorBuilder: (BuildContext context, int index) =>
-                  Divider(height: 1));
-        }
-        return Center(
-            child: Text(
-          'No users found',
-          style: Theme.of(context).textTheme.body1.copyWith(color: Colors.grey),
-        ));
+        return ListView.separated(
+            itemCount: snapshot.data.length,
+            itemBuilder: (BuildContext context, int index) => UserListItem(
+                  user: snapshot.data[index],
+                  key: Key(snapshot.data[index].id),
+                ),
+            separatorBuilder: (BuildContext context, int index) =>
+                Divider(height: 1));
       },
     );
   }

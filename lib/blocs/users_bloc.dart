@@ -6,7 +6,8 @@ import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/models/user_stats.dart';
 
 class UsersBloc implements BlocBase {
-  final List<User> _users = List<User>();
+  final List<User> _allUsers = List<User>();
+  final List<User> _visibleUsers = List<User>();
   Timer _onlineTimer;
 
   final StreamController<List<User>> _usersController =
@@ -19,10 +20,10 @@ class UsersBloc implements BlocBase {
   UsersBloc() {
     // create users
     for (var i = 0; i < 100; i++) {
-      _users.add(User(id: i.toString(), name: 'User $i'));
+      _allUsers.add(User(id: i.toString(), name: 'User $i'));
     }
-    // notify listeners
-    _usersController.sink.add(_users);
+    // initialize visible users
+    search(null);
 
     // start a timer to emulate online/offline behavior
     _onlineTimer = Timer.periodic(Duration(seconds: 1), onTick);
@@ -34,26 +35,33 @@ class UsersBloc implements BlocBase {
   void onTick(Timer timer) {
     final rnd = Random();
     // toggle online/offline state of random 5% of the users every second
-    for (var i = 0; i < _users.length * .05; i++) {
-      var user = _users[rnd.nextInt(_users.length)];
+    for (var i = 0; i < _allUsers.length * .05; i++) {
+      var user = _allUsers[rnd.nextInt(_allUsers.length)];
       user.online = !user.online;
 
       _onlineUserController.sink.add(user);
     }
-    // update user stats
+
+    updateVisibleUserStats();
+  }
+
+  void updateVisibleUserStats() {
     _userStatsController.sink.add(UserStats(
-        count: _users.length,
-        online: _users.where((user) => user.online).length));
+        count: _visibleUsers.length,
+        online: _visibleUsers.where((user) => user.online).length));
   }
 
   void search(String searchTerm) {
+    _visibleUsers.clear();
     if (searchTerm == null || searchTerm.isEmpty) {
-      _usersController.sink.add(_users);
+      _visibleUsers.addAll(_allUsers);
     } else {
-      _usersController.sink.add(_users
-          .where((u) => u.name.toLowerCase().contains(searchTerm.toLowerCase()))
-          .toList());
+      _visibleUsers.addAll(_allUsers.where(
+          (u) => u.name.toLowerCase().contains(searchTerm.toLowerCase())));
     }
+
+    _usersController.sink.add(_visibleUsers);
+    updateVisibleUserStats();
   }
 
   UserBloc createBloc(User user) {
