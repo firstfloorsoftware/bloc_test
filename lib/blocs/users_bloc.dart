@@ -36,7 +36,7 @@ class UsersBloc implements BlocBase {
     final rnd = Random();
     // toggle online/offline state of random 5% of the users every second
     for (var i = 0; i < _allUsers.length * .05; i++) {
-      var user = _allUsers[rnd.nextInt(_allUsers.length)];
+      final user = _allUsers[rnd.nextInt(_allUsers.length)];
       user.online = !user.online;
 
       _onlineUserController.sink.add(user);
