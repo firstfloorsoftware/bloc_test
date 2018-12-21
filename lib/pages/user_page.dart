@@ -40,15 +40,21 @@ class _UserPageState extends BlocState<UserPage, UserBloc> {
                       padding: EdgeInsets.all(16),
                       child: CircleAvatar(
                           radius: 100, child: Icon(Icons.person, size: 100))),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      OnlineIndicator(online: user.online),
-                      Padding(
-                          padding: EdgeInsets.only(left: 8),
-                          child: Text(user.online ? 'Online' : 'Offline'))
-                    ],
-                  )
+                  Padding(
+                      padding: EdgeInsets.only(bottom: 8),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            OnlineIndicator(online: user.online),
+                            Padding(
+                                padding: EdgeInsets.only(left: 8),
+                                child: Text(user.online ? 'Online' : 'Offline'))
+                          ])),
+                  IconButton(
+                      icon: user.favorite
+                          ? Icon(Icons.favorite, color: Colors.red)
+                          : Icon(Icons.favorite_border),
+                      onPressed: bloc.toggleFavorite)
                 ],
               ));
         });
