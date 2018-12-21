@@ -3,16 +3,18 @@ import 'dart:math';
 import 'package:bloc_test/blocs/bloc_provider.dart';
 import 'package:bloc_test/blocs/user_bloc.dart';
 import 'package:bloc_test/models/user.dart';
+import 'package:bloc_test/models/user_stats.dart';
 
 class UsersBloc implements BlocBase {
   final List<User> _users = List<User>();
+  Timer _onlineTimer;
 
   final StreamController<List<User>> _usersController =
       StreamController<List<User>>();
   final StreamController<User> _onlineUserController =
       StreamController<User>.broadcast();
-  Timer _onlineTimer;
-  Stream<List<User>> get usersStream => _usersController.stream;
+  final StreamController<UserStats> _userStatsController =
+      StreamController<UserStats>();
 
   UsersBloc() {
     // create users
@@ -23,8 +25,11 @@ class UsersBloc implements BlocBase {
     _usersController.sink.add(_users);
 
     // start a timer to emulate online/offline behavior
-    _onlineTimer = Timer.periodic(Duration(milliseconds: 1000), onTick);
+    _onlineTimer = Timer.periodic(Duration(seconds: 1), onTick);
   }
+
+  Stream<UserStats> get userStatsStream => _userStatsController.stream;
+  Stream<List<User>> get usersStream => _usersController.stream;
 
   void onTick(Timer timer) {
     final rnd = Random();
@@ -35,6 +40,10 @@ class UsersBloc implements BlocBase {
 
       _onlineUserController.sink.add(user);
     }
+    // update user stats
+    _userStatsController.sink.add(UserStats(
+        count: _users.length,
+        online: _users.where((user) => user.online).length));
   }
 
   void search(String searchTerm) {
@@ -56,5 +65,6 @@ class UsersBloc implements BlocBase {
     _onlineTimer.cancel();
     _usersController.close();
     _onlineUserController.close();
+    _userStatsController.close();
   }
 }

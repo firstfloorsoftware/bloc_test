@@ -5,7 +5,6 @@ import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/widgets/user_list_item.dart';
 
 class UserListView extends StatelessWidget {
-  
   @override
   Widget build(BuildContext context) {
     final usersBloc = BlocProvider.of<UsersBloc>(context);
@@ -26,7 +25,11 @@ class UserListView extends StatelessWidget {
               separatorBuilder: (BuildContext context, int index) =>
                   Divider(height: 1));
         }
-        return Center(child: Text('No users found'));
+        return Center(
+            child: Text(
+          'No users found',
+          style: Theme.of(context).textTheme.body1.copyWith(color: Colors.grey),
+        ));
       },
     );
   }
