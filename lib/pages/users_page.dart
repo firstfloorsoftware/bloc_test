@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:bloc_test/blocs/bloc_provider.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
-import 'package:bloc_test/widgets/user_list_view.dart';
 import 'package:bloc_test/models/user_stats.dart';
+import 'package:bloc_test/widgets/user_list_view.dart';
+import 'package:bloc_test/widgets/user_stats_text.dart';
 
-class UsersPage extends StatelessWidget {
+class UsersPage extends StatefulWidget {
+  @override
+  _UsersPageState createState() => _UsersPageState();
+}
+
+class _UsersPageState extends State<UsersPage> {
+  bool _searching;
+
   @override
   Widget build(BuildContext context) {
     final usersBloc = BlocProvider.of<UsersBloc>(context);
@@ -12,6 +20,7 @@ class UsersPage extends StatelessWidget {
         appBar: AppBar(
             title: TextField(
                 decoration: InputDecoration(
+                    border: InputBorder.none,
                     prefixIcon: Icon(Icons.search, color: Colors.white)),
                 style: Theme.of(context)
                     .textTheme
@@ -26,21 +35,8 @@ class UsersPage extends StatelessWidget {
                 child: StreamBuilder(
                     stream: usersBloc.userStatsStream,
                     builder: (BuildContext context,
-                        AsyncSnapshot<UserStats> snapshot) {
-                      if (snapshot.hasData) {
-                        final stats = snapshot.data;
-                        final String text = stats.count > 0
-                            ? '${stats.count} user${stats.count != 1 ? 's' : ''}, ${stats.online} online, ${stats.favorite} favorite${stats.favorite != 1 ? 's' : ''}'
-                            : 'No users found';
-
-                        return Text(text,
-                            style: Theme.of(context)
-                                .textTheme
-                                .body1
-                                .copyWith(color: Colors.grey));
-                      }
-                      return Container();
-                    }))
+                            AsyncSnapshot<UserStats> snapshot) =>
+                        UserStatsText(snapshot.data)))
           ],
         ));
   }
