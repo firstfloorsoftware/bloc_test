@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bloc_test/blocs/bloc_provider.dart';
+import 'package:bloc_test/blocs/bloc_state.dart';
 import 'package:bloc_test/blocs/user_bloc.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
 import 'package:bloc_test/models/user.dart';
@@ -15,21 +16,18 @@ class UserListItem extends StatefulWidget {
   _UserListItemState createState() => _UserListItemState();
 }
 
-class _UserListItemState extends State<UserListItem> {
-  UserBloc userBloc;
-
+class _UserListItemState extends BlocState<UserListItem, UserBloc> {
   @override
-  void initState() {
+  UserBloc createBloc() {
     final usersBloc = BlocProvider.of<UsersBloc>(context);
-    userBloc = usersBloc.createBloc(widget.user);
-    super.initState();
+    return usersBloc.createBloc(widget.user);
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        initialData: userBloc.user,
-        stream: userBloc.userStream,
+        initialData: bloc.user,
+        stream: bloc.userStream,
         builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
           final user = snapshot.data;
           return ListTile(
@@ -44,7 +42,7 @@ class _UserListItemState extends State<UserListItem> {
               icon: user.favorite
                   ? Icon(Icons.favorite, color: Colors.red)
                   : Icon(Icons.favorite_border),
-              onPressed: userBloc.toggleFavorite,
+              onPressed: bloc.toggleFavorite,
             ),
             onTap: () {
               Navigator.of(context).push(
@@ -52,11 +50,5 @@ class _UserListItemState extends State<UserListItem> {
             },
           );
         });
-  }
-
-  @override
-  void dispose() {
-    userBloc.dispose();
-    super.dispose();
   }
 }
