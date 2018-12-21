@@ -30,7 +30,7 @@ class UsersPage extends StatelessWidget {
                       if (snapshot.hasData) {
                         final stats = snapshot.data;
                         final String text = stats.count > 0
-                            ? '${stats.count} user${stats.count != 1 ? 's' : ''}, ${stats.online} online'
+                            ? '${stats.count} user${stats.count != 1 ? 's' : ''}, ${stats.online} online, ${stats.favorite} favorite${stats.favorite != 1 ? 's' : ''}'
                             : 'No users found';
 
                         return Text(text,

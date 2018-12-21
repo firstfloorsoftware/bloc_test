@@ -10,10 +10,13 @@ class UsersBloc implements BlocBase {
   final List<User> _visibleUsers = List<User>();
   Timer _onlineTimer;
 
+  // visible user list stream
   final StreamController<List<User>> _usersController =
       StreamController<List<User>>();
+  // online user state stream
   final StreamController<User> _onlineUserController =
       StreamController<User>.broadcast();
+  // visible user statistics stream
   final StreamController<UserStats> _userStatsController =
       StreamController<UserStats>();
 
@@ -26,13 +29,14 @@ class UsersBloc implements BlocBase {
     search(null);
 
     // start a timer to emulate online/offline behavior
-    _onlineTimer = Timer.periodic(Duration(seconds: 1), onTick);
+    _onlineTimer = Timer.periodic(Duration(seconds: 1), _onTick);
   }
 
   Stream<UserStats> get userStatsStream => _userStatsController.stream;
   Stream<List<User>> get usersStream => _usersController.stream;
+  Stream<User> get onlineUserStream => _onlineUserController.stream;
 
-  void onTick(Timer timer) {
+  void _onTick(Timer timer) {
     final rnd = Random();
     // toggle online/offline state of random 5% of the users every second
     for (var i = 0; i < _allUsers.length * .05; i++) {
@@ -42,17 +46,22 @@ class UsersBloc implements BlocBase {
       _onlineUserController.sink.add(user);
     }
 
-    updateVisibleUserStats();
+    // update stats after online states have changed
+    _updateUserStats();
   }
 
-  void updateVisibleUserStats() {
+  void _updateUserStats() {
     _userStatsController.sink.add(UserStats(
         count: _visibleUsers.length,
-        online: _visibleUsers.where((user) => user.online).length));
+        online: _visibleUsers.where((user) => user.online).length,
+        favorite: _visibleUsers.where((user) => user.favorite).length));
   }
 
   void search(String searchTerm) {
+    // clear visible users
     _visibleUsers.clear();
+
+    // filter visible users based on search term
     if (searchTerm == null || searchTerm.isEmpty) {
       _visibleUsers.addAll(_allUsers);
     } else {
@@ -61,12 +70,20 @@ class UsersBloc implements BlocBase {
     }
 
     _usersController.sink.add(_visibleUsers);
-    updateVisibleUserStats();
+
+    // update stats after filtering visible users
+    _updateUserStats();
+  }
+
+  void toggleFavorite(User user){
+    user.favorite = !user.favorite;
+
+    // update stats after toggling favorite
+    _updateUserStats();
   }
 
   UserBloc createBloc(User user) {
-    return UserBloc(user,
-        _onlineUserController.stream.where((u) => user == u).listen(null));
+    return UserBloc(user,this);
   }
 
   void dispose() {
