@@ -2,31 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:bloc_test/blocs/bloc_provider.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
 import 'package:bloc_test/models/user_stats.dart';
+import 'package:bloc_test/widgets/app_search_bar.dart';
 import 'package:bloc_test/widgets/user_list_view.dart';
 import 'package:bloc_test/widgets/user_stats_text.dart';
 
-class UsersPage extends StatefulWidget {
-  @override
-  _UsersPageState createState() => _UsersPageState();
-}
-
-class _UsersPageState extends State<UsersPage> {
-  bool _searching;
-
+class UsersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final usersBloc = BlocProvider.of<UsersBloc>(context);
     return Scaffold(
-        appBar: AppBar(
-            title: TextField(
-                decoration: InputDecoration(
-                    border: InputBorder.none,
-                    prefixIcon: Icon(Icons.search, color: Colors.white)),
-                style: Theme.of(context)
-                    .textTheme
-                    .subhead
-                    .copyWith(color: Colors.white),
-                onChanged: usersBloc.search)),
+        appBar: AppSearchBar(title: Text('Users'), onSearch: usersBloc.search),
         body: Column(
           children: <Widget>[
             Expanded(child: UserListView()),
