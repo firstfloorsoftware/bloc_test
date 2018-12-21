@@ -27,32 +27,36 @@ class _UserListItemState extends State<UserListItem> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<UserBloc>(
-        bloc: userBloc,
-        child: StreamBuilder(
-            initialData: userBloc.user,
-            stream: userBloc.userStream,
-            builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
-              final user = snapshot.data;
-              return ListTile(
-                title: Row(children: <Widget>[
-                  Text(user.name),
-                  Padding(
-                      padding: EdgeInsets.only(left: 8),
-                      child: user.online ? OnlineIndicator() : null)
-                ]),
-                leading: CircleAvatar(child: Icon(Icons.person)),
-                trailing: IconButton(
-                  icon: user.favorite
-                      ? Icon(Icons.favorite, color: Colors.red)
-                      : Icon(Icons.favorite_border),
-                  onPressed: userBloc.toggleFavorite,
-                ),
-                onTap: () {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => UserPage(user)));
-                },
-              );
-            }));
+    return StreamBuilder(
+        initialData: userBloc.user,
+        stream: userBloc.userStream,
+        builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+          final user = snapshot.data;
+          return ListTile(
+            title: Row(children: <Widget>[
+              Text(user.name),
+              Padding(
+                  padding: EdgeInsets.only(left: 8),
+                  child: user.online ? OnlineIndicator() : null)
+            ]),
+            leading: CircleAvatar(child: Icon(Icons.person)),
+            trailing: IconButton(
+              icon: user.favorite
+                  ? Icon(Icons.favorite, color: Colors.red)
+                  : Icon(Icons.favorite_border),
+              onPressed: userBloc.toggleFavorite,
+            ),
+            onTap: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => UserPage(user)));
+            },
+          );
+        });
+  }
+
+  @override
+  void dispose() {
+    userBloc.dispose();
+    super.dispose();
   }
 }
