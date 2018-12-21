@@ -3,45 +3,56 @@ import 'package:bloc_test/blocs/bloc_provider.dart';
 import 'package:bloc_test/blocs/user_bloc.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
 import 'package:bloc_test/models/user.dart';
+import 'package:bloc_test/pages/user_page.dart';
+import 'package:bloc_test/widgets/online_indicator.dart';
 
-class UserListItem extends StatelessWidget {
+class UserListItem extends StatefulWidget {
   final User user;
 
   const UserListItem({@required this.user, Key key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  _UserListItemState createState() => _UserListItemState();
+}
+
+class _UserListItemState extends State<UserListItem> {
+  UserBloc userBloc;
+
+  @override
+  void initState() {
     final usersBloc = BlocProvider.of<UsersBloc>(context);
-    final userBloc = usersBloc.createBloc(user);
+    userBloc = usersBloc.createBloc(widget.user);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return BlocProvider<UserBloc>(
         bloc: userBloc,
         child: StreamBuilder(
-            initialData: user,
-            stream: userBloc.user,
+            initialData: userBloc.user,
+            stream: userBloc.userStream,
             builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
               final user = snapshot.data;
               return ListTile(
-                  title: Row(children: <Widget>[
-                    Text(user.fullName),
-                    Padding(
-                        padding: EdgeInsets.only(left: 8),
-                        child: user.online
-                            ? Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                    color: Colors.green,
-                                    shape: BoxShape.circle))
-                            : null)
-                  ]),
-                  leading: CircleAvatar(
-                      backgroundImage: NetworkImage(user.thumbnailUri)),
-                  trailing: IconButton(
-                    icon: user.favorite
-                        ? Icon(Icons.favorite, color: Colors.red)
-                        : Icon(Icons.favorite_border),
-                    onPressed: userBloc.toggleFavorite,
-                  ));
+                title: Row(children: <Widget>[
+                  Text(user.name),
+                  Padding(
+                      padding: EdgeInsets.only(left: 8),
+                      child: user.online ? OnlineIndicator() : null)
+                ]),
+                leading: CircleAvatar(child: Icon(Icons.person)),
+                trailing: IconButton(
+                  icon: user.favorite
+                      ? Icon(Icons.favorite, color: Colors.red)
+                      : Icon(Icons.favorite_border),
+                  onPressed: userBloc.toggleFavorite,
+                ),
+                onTap: () {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => UserPage(user)));
+                },
+              );
             }));
   }
 }

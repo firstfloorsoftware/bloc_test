@@ -5,12 +5,13 @@ import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/widgets/user_list_item.dart';
 
 class UserListView extends StatelessWidget {
+  
   @override
   Widget build(BuildContext context) {
     final usersBloc = BlocProvider.of<UsersBloc>(context);
 
     return StreamBuilder(
-      stream: usersBloc.users,
+      stream: usersBloc.usersStream,
       builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());

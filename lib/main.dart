@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bloc_test/blocs/bloc_provider.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
-import 'package:bloc_test/pages/user_page.dart';
+import 'package:bloc_test/pages/users_page.dart';
 
 void main() => runApp(MyApp());
 
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: UserPage(),
+          home: UsersPage(),
         ));
   }
 }
