@@ -1,95 +1,123 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:bloc_test/blocs/bloc_provider.dart';
-import 'package:bloc_test/blocs/user_bloc.dart';
 import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/models/user_stats.dart';
 
 class UsersBloc implements BlocBase {
-  final List<User> _allUsers = List<User>();
-  final List<User> _visibleUsers = List<User>();
+  final Map<String, User> _users = Map<String, User>();
+  int _userIdSeed = 0;
+  String _searchTerm;
   Timer _onlineTimer;
 
-  // visible user list stream
+  // signal user list changes
   final StreamController<List<User>> _usersController =
       StreamController<List<User>>();
-  // online user state stream
-  final StreamController<User> _onlineUserController =
+  // signal user changes
+  final StreamController<User> _userController =
       StreamController<User>.broadcast();
-  // visible user statistics stream
+  // signal user statistics
   final StreamController<UserStats> _userStatsController =
       StreamController<UserStats>();
 
   UsersBloc() {
     // create users
     for (var i = 0; i < 100; i++) {
-      _allUsers.add(User(id: i.toString(), name: 'User $i'));
+      final id = i.toString();
+      _users[id] = User(id: id, name: 'User $id');
     }
-    // initialize visible users
+    _userIdSeed = _users.length;
+
+    // initialize users stream
     search(null);
 
     // start a timer to emulate online/offline behavior
     _onlineTimer = Timer.periodic(Duration(seconds: 1), _onTick);
   }
 
-  Stream<UserStats> get userStatsStream => _userStatsController.stream;
   Stream<List<User>> get usersStream => _usersController.stream;
-  Stream<User> get onlineUserStream => _onlineUserController.stream;
+  Stream<User> get userStream => _userController.stream;
+  Stream<UserStats> get userStatsStream => _userStatsController.stream;
 
   void _onTick(Timer timer) {
+    // toggle online/offline state of random 5% of the users
+    final keys = _users.keys.toList();
     final rnd = Random();
-    // toggle online/offline state of random 5% of the users every second
-    for (var i = 0; i < _allUsers.length * .05; i++) {
-      final user = _allUsers[rnd.nextInt(_allUsers.length)];
-      user.online = !user.online;
 
-      _onlineUserController.sink.add(user);
+    for (var i = 0; i < keys.length * .05; i++) {
+      // get random id
+      final id = keys[rnd.nextInt(_users.length)];
+
+      // update online state
+      _updateUser(id, (user) => user.copyWith(online: !user.online));
     }
+  }
 
-    // update stats after online states have changed
+  void _updateUser(String id, User Function(User) update) {
+    // update user in map (id must exist)
+    final user = _users.update(id, update);
+
+    // signal update
+    _userController.sink.add(user);
+
+    // update stats
+    _updateUserStats();
+  }
+
+  void _updateUsers() {
+    // filter users based on search term
+    final users = _users.values
+        .where((user) =>
+            _searchTerm == null ||
+            _searchTerm.isEmpty ||
+            user.name.toLowerCase().contains(_searchTerm.toLowerCase()))
+        .toList();
+
+    // signal listeners
+    _usersController.sink.add(users);
+
+    // update stats
     _updateUserStats();
   }
 
   void _updateUserStats() {
     _userStatsController.sink.add(UserStats(
-        count: _visibleUsers.length,
-        online: _visibleUsers.where((user) => user.online).length,
-        favorite: _visibleUsers.where((user) => user.favorite).length));
+        count: _users.length,
+        online: _users.values.where((user) => user.online).length,
+        favorite: _users.values.where((user) => user.favorite).length));
   }
 
   void search(String searchTerm) {
-    // clear visible users
-    _visibleUsers.clear();
+    this._searchTerm = searchTerm;
 
-    // filter visible users based on search term
-    if (searchTerm == null || searchTerm.isEmpty) {
-      _visibleUsers.addAll(_allUsers);
-    } else {
-      _visibleUsers.addAll(_allUsers.where(
-          (u) => u.name.toLowerCase().contains(searchTerm.toLowerCase())));
+    _updateUsers();
+  }
+
+  void toggleFavorite(String id) {
+    _updateUser(id, (user) => user.copyWith(favorite: !user.favorite));
+  }
+
+  User addUser() {
+    final id = (_userIdSeed++).toString();
+    final user = User(id: id, name: 'User $id');
+    _users[id] = user;
+    _updateUsers();
+
+    return user;
+  }
+
+  User removeUser(String id) {
+    final user = _users.remove(id);
+    if (user != null) {
+      _updateUsers();
     }
-
-    _usersController.sink.add(_visibleUsers);
-
-    // update stats after filtering visible users
-    _updateUserStats();
-  }
-
-  void toggleFavorite(User user){
-    user.favorite = !user.favorite;
-
-    // update stats after toggling favorite
-    _updateUserStats();
-  }
-
-  UserBloc createBloc(User user) {
-    return UserBloc(user,this);
+    return user;
   }
 
   void dispose() {
     _onlineTimer.cancel();
     _usersController.close();
-    _onlineUserController.close();
+    _userController.close();
     _userStatsController.close();
   }
 }

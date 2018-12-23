@@ -23,6 +23,8 @@ class UsersPage extends StatelessWidget {
                             AsyncSnapshot<UserStats> snapshot) =>
                         UserStatsText(snapshot.data)))
           ],
-        ));
+        ),
+        floatingActionButton: FloatingActionButton(
+            child: Icon(Icons.add), onPressed: usersBloc.addUser));
   }
 }

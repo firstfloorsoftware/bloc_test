@@ -17,10 +17,19 @@ class UserListView extends StatelessWidget {
         }
         return ListView.separated(
             itemCount: snapshot.data.length,
-            itemBuilder: (BuildContext context, int index) => UserListItem(
-                  user: snapshot.data[index],
-                  key: Key(snapshot.data[index].id),
+            itemBuilder: (BuildContext context, int index) {
+              var user = snapshot.data[index];
+              return Dismissible(
+                key: Key(user.id),
+                background: Container(color: Colors.red),
+                child: UserListItem(
+                  user: user,
                 ),
+                onDismissed: (direction) {
+                  usersBloc.removeUser(user.id);
+                },
+              );
+            },
             separatorBuilder: (BuildContext context, int index) =>
                 Divider(height: 1));
       },

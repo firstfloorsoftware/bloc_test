@@ -1,23 +1,22 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:bloc_test/blocs/bloc_provider.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
 import 'package:bloc_test/models/user.dart';
 
 class UserBloc implements BlocBase {
-  final User user;
+  final String userId;
   final UsersBloc usersBloc;
-  final StreamSubscription<User> _onlineSubscription;
+  final StreamSubscription<User> _subscription;
   final StreamController<User> _userController = StreamController<User>();
 
-  UserBloc(this.user, this.usersBloc)
-      // listen for online state changes for this user only 
-      : _onlineSubscription =
-            usersBloc.onlineUserStream.where((u) => user == u).listen(null) {
-    print('UserBloc ctor ${user.name}');
-
-    // signal user change on online state changes
-    _onlineSubscription.onData((user) {
-      assert(user == this.user);
+  UserBloc({@required this.userId, @required this.usersBloc})
+      // listen for changes of this user
+      : _subscription = usersBloc.userStream
+            .where((user) => user.id == userId)
+            .listen(null) {
+    // signal user change
+    _subscription.onData((user) {
       _userController.sink.add(user);
     });
   }
@@ -25,15 +24,11 @@ class UserBloc implements BlocBase {
   Stream<User> get userStream => _userController.stream;
 
   void toggleFavorite() {
-    usersBloc.toggleFavorite(user);
-
-    // signal user change
-    _userController.sink.add(user);
+    usersBloc.toggleFavorite(userId);
   }
 
   void dispose() {
-    print('UserBloc dispose ${user.name}');
     _userController.close();
-    _onlineSubscription.cancel();
+    _subscription.cancel();
   }
 }
