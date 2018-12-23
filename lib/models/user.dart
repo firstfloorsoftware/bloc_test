@@ -1,10 +1,15 @@
 import 'package:flutter/foundation.dart';
 
-class User {
+class User implements Comparable<User> {
   final String id;
   final String name;
   final bool online;
   final bool favorite;
+
+  @override
+    int compareTo(User other) {
+      return name.compareTo(other.name);
+    }
 
   const User(
       {@required this.id,

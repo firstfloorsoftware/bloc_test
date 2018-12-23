@@ -40,28 +40,34 @@ class UsersBloc implements BlocBase {
   Stream<UserStats> get userStatsStream => _userStatsController.stream;
 
   void _onTick(Timer timer) {
-    // toggle online/offline state of random 5% of the users
+    // toggle online/offline state of 10 random users
     final keys = _users.keys.toList();
     final rnd = Random();
 
-    for (var i = 0; i < keys.length * .05; i++) {
+    for (var i = 0; i < 10; i++) {
       // get random id
       final id = keys[rnd.nextInt(_users.length)];
 
       // update online state
-      _updateUser(id, (user) => user.copyWith(online: !user.online));
+      _updateUser(id, (user) => user.copyWith(online: !user.online), updateStats: false);
     }
+
+    // update stats once, and not for every user update
+    _updateUserStats();
   }
 
-  void _updateUser(String id, User Function(User) update) {
+  void _updateUser(String id, User Function(User) update,
+      {bool updateStats = true}) {
     // update user in map (id must exist)
     final user = _users.update(id, update);
 
     // signal update
     _userController.sink.add(user);
 
-    // update stats
-    _updateUserStats();
+    if (updateStats) {
+      // update stats
+      _updateUserStats();
+    }
   }
 
   void _updateUsers() {
@@ -72,6 +78,9 @@ class UsersBloc implements BlocBase {
             _searchTerm.isEmpty ||
             user.name.toLowerCase().contains(_searchTerm.toLowerCase()))
         .toList();
+
+    // sort (don't do this for large lists)
+    users.sort();
 
     // signal listeners
     _usersController.sink.add(users);
@@ -97,10 +106,12 @@ class UsersBloc implements BlocBase {
     _updateUser(id, (user) => user.copyWith(favorite: !user.favorite));
   }
 
-  User addUser() {
-    final id = (_userIdSeed++).toString();
-    final user = User(id: id, name: 'User $id');
-    _users[id] = user;
+  User addUser({User user}) {
+    if (user == null) {
+      final id = (_userIdSeed++).toString();
+      user = User(id: id, name: 'User $id');
+    }
+    _users[user.id] = user;
     _updateUsers();
 
     return user;
