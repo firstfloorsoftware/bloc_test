@@ -21,7 +21,16 @@ class UserListView extends StatelessWidget {
               final user = snapshot.data[index];
               return Dismissible(
                 key: Key(user.id),
-                background: Container(color: Colors.red),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                    color: Colors.red,
+                    padding: EdgeInsets.symmetric(horizontal: 28),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(child: Container()),
+                        Icon(Icons.delete, color: Colors.white)
+                      ],
+                    )),
                 child: UserListItem(
                   user: user,
                 ),
@@ -38,7 +47,8 @@ class UserListView extends StatelessWidget {
                     content: Text('${user.name} removed'),
                     action: SnackBarAction(
                       label: 'Undo',
-                      onPressed: () => usersBloc.insertUser(removedUser.index, removedUser.user),
+                      onPressed: () => usersBloc.insertUser(
+                          removedUser.index, removedUser.user),
                     ),
                   );
                   scaffold.showSnackBar(snackBar);
