@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'dart:math';
 import 'package:bloc_test/blocs/bloc_provider.dart';
 import 'package:bloc_test/models/user.dart';
@@ -23,7 +22,7 @@ class UsersBloc implements BlocBase {
 
   UsersBloc() {
     // create users
-    for (var i = 0; i < 10000; i++) {
+    for (var i = 0; i < 100; i++) {
       final id = i.toString();
       _users.add(User(id: id, name: 'User $id'));
     }
@@ -76,6 +75,9 @@ class UsersBloc implements BlocBase {
 
     // signal listeners
     _usersController.sink.add(users);
+
+    // update stats
+    _updateUserStats();
   }
 
   void _updateUserStats() {
@@ -87,7 +89,6 @@ class UsersBloc implements BlocBase {
 
   void search(String searchTerm) {
     this._searchTerm = searchTerm;
-
     _updateUsers();
   }
 
@@ -108,13 +109,11 @@ class UsersBloc implements BlocBase {
 
     _users.add(user);
     _updateUsers();
-    _updateUserStats();
   }
 
   void insertUser(int index, User user) {
     _users.insert(index, user);
     _updateUsers();
-    _updateUserStats();
   }
 
   UserWithIndex removeUser(String userId) {
@@ -122,7 +121,6 @@ class UsersBloc implements BlocBase {
     if (index != -1) {
       final user = _users.removeAt(index);
       _updateUsers();
-      _updateUserStats();
       return UserWithIndex(user: user, index: index);
     }
     return null;
