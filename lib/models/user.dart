@@ -7,9 +7,9 @@ class User implements Comparable<User> {
   final bool favorite;
 
   @override
-    int compareTo(User other) {
-      return name.compareTo(other.name);
-    }
+  int compareTo(User other) {
+    return name.compareTo(other.name);
+  }
 
   const User(
       {@required this.id,
@@ -24,4 +24,11 @@ class User implements Comparable<User> {
         online: online ?? this.online,
         favorite: favorite ?? this.favorite);
   }
+}
+
+class UserWithIndex {
+  final User user;
+  final int index;
+
+  const UserWithIndex({@required this.user, @required this.index});
 }

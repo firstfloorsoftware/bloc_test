@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'dart:math';
 import 'package:bloc_test/blocs/bloc_provider.dart';
 import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/models/user_stats.dart';
 
 class UsersBloc implements BlocBase {
-  final Map<String, User> _users = Map<String, User>();
+  final List<User> _users = List<User>();
   int _userIdSeed = 0;
   String _searchTerm;
   Timer _onlineTimer;
@@ -22,9 +23,9 @@ class UsersBloc implements BlocBase {
 
   UsersBloc() {
     // create users
-    for (var i = 0; i < 100; i++) {
+    for (var i = 0; i < 10000; i++) {
       final id = i.toString();
-      _users[id] = User(id: id, name: 'User $id');
+      _users.add(User(id: id, name: 'User $id'));
     }
     _userIdSeed = _users.length;
 
@@ -41,59 +42,47 @@ class UsersBloc implements BlocBase {
 
   void _onTick(Timer timer) {
     // toggle online/offline state of 10 random users
-    final keys = _users.keys.toList();
     final rnd = Random();
 
     for (var i = 0; i < 10; i++) {
-      // get random id
-      final id = keys[rnd.nextInt(_users.length)];
+      // get random user
+      final index = rnd.nextInt(_users.length);
+      final user = _users[index];
 
       // update online state
-      _updateUser(id, (user) => user.copyWith(online: !user.online), updateStats: false);
+      _updateUser(index, user.copyWith(online: !user.online));
     }
 
     // update stats once, and not for every user update
     _updateUserStats();
   }
 
-  void _updateUser(String id, User Function(User) update,
-      {bool updateStats = true}) {
-    // update user in map (id must exist)
-    final user = _users.update(id, update);
+  void _updateUser(int index, User user) {
+    // update user
+    _users[index] = user;
 
     // signal update
     _userController.sink.add(user);
-
-    if (updateStats) {
-      // update stats
-      _updateUserStats();
-    }
   }
 
   void _updateUsers() {
     // filter users based on search term
-    final users = _users.values
-        .where((user) =>
-            _searchTerm == null ||
-            _searchTerm.isEmpty ||
-            user.name.toLowerCase().contains(_searchTerm.toLowerCase()))
-        .toList();
-
-    // sort (don't do this for large lists)
-    users.sort();
+    final users = _searchTerm == null || _searchTerm.isEmpty
+        ? _users
+        : _users
+            .where((user) =>
+                user.name.toLowerCase().contains(_searchTerm.toLowerCase()))
+            .toList();
 
     // signal listeners
     _usersController.sink.add(users);
-
-    // update stats
-    _updateUserStats();
   }
 
   void _updateUserStats() {
     _userStatsController.sink.add(UserStats(
         count: _users.length,
-        online: _users.values.where((user) => user.online).length,
-        favorite: _users.values.where((user) => user.favorite).length));
+        online: _users.where((user) => user.online).length,
+        favorite: _users.where((user) => user.favorite).length));
   }
 
   void search(String searchTerm) {
@@ -102,27 +91,41 @@ class UsersBloc implements BlocBase {
     _updateUsers();
   }
 
-  void toggleFavorite(String id) {
-    _updateUser(id, (user) => user.copyWith(favorite: !user.favorite));
+  void toggleFavorite(String userId) {
+    final index = _users.indexWhere((user) => user.id == userId);
+    if (index != -1) {
+      final user = _users[index];
+      // update user
+      _updateUser(index, user.copyWith(favorite: !user.favorite));
+      // update stats
+      _updateUserStats();
+    }
   }
 
-  User addUser({User user}) {
-    if (user == null) {
-      final id = (_userIdSeed++).toString();
-      user = User(id: id, name: 'User $id');
-    }
-    _users[user.id] = user;
+  void addUser() {
+    final id = (_userIdSeed++).toString();
+    final user = User(id: id, name: 'User $id');
+
+    _users.add(user);
     _updateUsers();
-
-    return user;
+    _updateUserStats();
   }
 
-  User removeUser(String id) {
-    final user = _users.remove(id);
-    if (user != null) {
+  void insertUser(int index, User user) {
+    _users.insert(index, user);
+    _updateUsers();
+    _updateUserStats();
+  }
+
+  UserWithIndex removeUser(String userId) {
+    final index = _users.indexWhere((user) => user.id == userId);
+    if (index != -1) {
+      final user = _users.removeAt(index);
       _updateUsers();
+      _updateUserStats();
+      return UserWithIndex(user: user, index: index);
     }
-    return user;
+    return null;
   }
 
   void dispose() {
