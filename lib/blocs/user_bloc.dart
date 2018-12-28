@@ -27,8 +27,8 @@ class UserBloc implements BlocBase {
     usersBloc.toggleFavorite(user);
   }
 
-  void toggleSelect(){
-    usersBloc.toggleSelect(user);
+  void toggleSelected(){
+    usersBloc.toggleSelected(user);
   }
 
   void dispose() {

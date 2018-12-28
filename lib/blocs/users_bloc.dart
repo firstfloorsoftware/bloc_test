@@ -96,7 +96,7 @@ class UsersBloc implements BlocBase {
     _updateUserStats();
   }
 
-  void toggleSelect(User user) {
+  void toggleSelected(User user) {
     user.selected = !user.selected;
     _userController.sink.add(user);
 
