@@ -25,44 +25,41 @@ class _UserListItemState extends BlocState<UserListItem, UserBloc> {
 
   @override
   Widget build(BuildContext context) {
-    final usersBloc = BlocProvider.of<UsersBloc>(context);
     return StreamBuilder(
         initialData: widget.user,
         stream: bloc.userStream,
         builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
           final user = snapshot.data;
-          return ListTile(
-            title: Row(children: <Widget>[
-              Text(user.name),
-              Padding(
-                  padding: EdgeInsets.only(left: 8),
-                  child: user.online ? OnlineIndicator() : null)
-            ]),
-            leading: StreamBuilder(
-                initialData: usersBloc.multiSelect,
-                stream: usersBloc.multiSelectStream,
-                builder: (BuildContext context, AsyncSnapshot<bool> snapshot) =>
-                    SelectableCircleAvatar(
+
+          return StreamBuilder(
+              initialData: bloc.usersBloc.multiSelect,
+              stream: bloc.usersBloc.multiSelectStream,
+              builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+                final multiSelect = snapshot.data;
+
+                return ListTile(
+                    title: Row(children: <Widget>[
+                      Text(user.name),
+                      Padding(
+                          padding: EdgeInsets.only(left: 8),
+                          child: user.online ? OnlineIndicator() : null)
+                    ]),
+                    leading: SelectableCircleAvatar(
                         icon: Icon(Icons.person),
-                        selecting: snapshot.data,
+                        selecting: multiSelect,
                         selected: user.selected,
-                        onPressed: bloc.toggleSelected)),
-            trailing: IconButton(
-              icon: user.favorite
-                  ? Icon(Icons.favorite, color: Colors.red)
-                  : Icon(Icons.favorite_border),
-              onPressed: usersBloc.multiSelect ? null : bloc.toggleFavorite,
-            ),
-            onTap: () {
-              if (usersBloc.multiSelect) {
-                bloc.toggleSelected();
-              } else {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => UserPage(user)));
-              }
-            },
-            onLongPress: bloc.toggleSelected
-          );
+                        onPressed: bloc.toggleSelected),
+                    trailing: IconButton(
+                        icon: user.favorite
+                            ? Icon(Icons.favorite, color: Colors.red)
+                            : Icon(Icons.favorite_border),
+                        onPressed: multiSelect ? null : bloc.toggleFavorite),
+                    onTap: multiSelect
+                        ? bloc.toggleSelected
+                        : () => Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => UserPage(user))),
+                    onLongPress: bloc.toggleSelected);
+              });
         });
   }
 }
