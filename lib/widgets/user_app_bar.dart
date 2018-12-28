@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bloc_test/blocs/bloc_provider.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
 import 'package:bloc_test/models/user.dart';
+import 'package:bloc_test/widgets/search_text_field.dart';
 
 class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
@@ -22,10 +23,11 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
               stream: usersBloc.searchTermStream,
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 final searchTerm = snapshot.data;
-                final selectedNoFavorite = selectedUsers.any((u) => !u.favorite);
+                final selectedNoFavorite =
+                    selectedUsers.any((u) => !u.favorite);
 
                 if (selectedUsers.isNotEmpty) {
-                  // multi-select mode with favorite and remove action
+                  // multi-select mode with favorite and remove actions
                   return AppBar(
                     title: Text('${selectedUsers.length}'),
                     leading: IconButton(
@@ -44,17 +46,10 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ],
                   );
                 } else if (searchTerm != null) {
-                  final titleStyle = Theme.of(context).textTheme.title;
                   // search mode
                   return AppBar(
-                      title: TextField(
-                          decoration: InputDecoration.collapsed(
-                              hintText: 'Search',
-                              hintStyle:
-                                  titleStyle.copyWith(color: Colors.white30)),
-                          autofocus: true,
-                          autocorrect: false,
-                          style: titleStyle.copyWith(color: Colors.white),
+                      title: SearchTextField(
+                          searchTerm: usersBloc.searchTerm,
                           onChanged: usersBloc.search),
                       leading: IconButton(
                         icon: Icon(Icons.clear),
