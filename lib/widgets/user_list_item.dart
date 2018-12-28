@@ -5,7 +5,6 @@ import 'package:bloc_test/blocs/user_bloc.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
 import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/pages/user_page.dart';
-import 'package:bloc_test/widgets/circle_avatar_border.dart';
 import 'package:bloc_test/widgets/online_indicator.dart';
 import 'package:bloc_test/widgets/selectable_circle_avatar.dart';
 
@@ -47,7 +46,7 @@ class _UserListItemState extends BlocState<UserListItem, UserBloc> {
                         icon: Icon(Icons.person),
                         selecting: snapshot.data,
                         selected: user.selected,
-                        onPressed: bloc.toggleSelect)),
+                        onPressed: bloc.toggleSelected)),
             trailing: IconButton(
               icon: user.favorite
                   ? Icon(Icons.favorite, color: Colors.red)
@@ -56,13 +55,13 @@ class _UserListItemState extends BlocState<UserListItem, UserBloc> {
             ),
             onTap: () {
               if (usersBloc.multiSelect) {
-                bloc.toggleSelect();
+                bloc.toggleSelected();
               } else {
                 Navigator.of(context).push(
                     MaterialPageRoute(builder: (context) => UserPage(user)));
               }
             },
-            onLongPress: bloc.toggleSelect
+            onLongPress: bloc.toggleSelected
           );
         });
   }

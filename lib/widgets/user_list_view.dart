@@ -57,7 +57,7 @@ class UserListView extends StatelessWidget {
             },
             separatorBuilder: (BuildContext context, int index) =>
                 Divider(height: 1));
-      },
+      }
     );
   }
 }
