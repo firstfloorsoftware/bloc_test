@@ -21,14 +21,14 @@ class UserListView extends StatelessWidget {
                 final user = snapshot.data[index];
 
                 return StreamBuilder(
-                    stream: usersBloc.multiSelectStream,
-                    initialData: usersBloc.multiSelect,
-                    builder:
-                        (BuildContext context, AsyncSnapshot<bool> snapshot) {
-                      final multiSelect = snapshot.data;
+                    initialData: usersBloc.selectedUsers,
+                    stream: usersBloc.selectedUsersStream,
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<User>> snapshot) {
+                      final selectedUsers = snapshot.data;
 
-                      return multiSelect
-                          // not dismissable in multi-select mode 
+                      return selectedUsers.isNotEmpty
+                          // not dismissable in multi-select mode
                           ? UserListItem(
                               user: user,
                             )

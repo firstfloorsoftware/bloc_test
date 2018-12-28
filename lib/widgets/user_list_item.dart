@@ -32,33 +32,41 @@ class _UserListItemState extends BlocState<UserListItem, UserBloc> {
           final user = snapshot.data;
 
           return StreamBuilder(
-              initialData: bloc.usersBloc.multiSelect,
-              stream: bloc.usersBloc.multiSelectStream,
-              builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-                final multiSelect = snapshot.data;
+              initialData: bloc.usersBloc.selectedUsers,
+              stream: bloc.usersBloc.selectedUsersStream,
+              builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
+                final selectedUsers = snapshot.data;
 
-                return ListTile(
-                    title: Row(children: <Widget>[
-                      Text(user.name),
-                      Padding(
-                          padding: EdgeInsets.only(left: 8),
-                          child: user.online ? OnlineIndicator() : null)
-                    ]),
-                    leading: SelectableCircleAvatar(
-                        icon: Icon(Icons.person),
-                        selecting: multiSelect,
-                        selected: user.selected,
-                        onPressed: bloc.toggleSelected),
-                    trailing: IconButton(
-                        icon: user.favorite
-                            ? Icon(Icons.favorite, color: Colors.red)
-                            : Icon(Icons.favorite_border),
-                        onPressed: multiSelect ? null : bloc.toggleFavorite),
-                    onTap: multiSelect
-                        ? bloc.toggleSelected
-                        : () => Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => UserPage(user))),
-                    onLongPress: bloc.toggleSelected);
+                return Container(
+                    color: user.selected
+                        ? Colors.grey.shade200
+                        : Colors.transparent,
+                    child: Material(
+                        color: Colors.transparent,
+                        child: ListTile(
+                            title: Row(children: <Widget>[
+                              Text(user.name),
+                              Padding(
+                                  padding: EdgeInsets.only(left: 8),
+                                  child: user.online ? OnlineIndicator() : null)
+                            ]),
+                            leading: SelectableCircleAvatar(
+                                icon: Icon(Icons.person),
+                                selecting: selectedUsers.isNotEmpty,
+                                selected: user.selected,
+                                onPressed: bloc.toggleSelected),
+                            trailing: IconButton(
+                                icon: user.favorite
+                                    ? Icon(Icons.favorite, color: Colors.red)
+                                    : Icon(Icons.favorite_border),
+                                onPressed:
+                                    selectedUsers.isNotEmpty ? null : bloc.toggleFavorite),
+                            onTap: selectedUsers.isNotEmpty
+                                ? bloc.toggleSelected
+                                : () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) => UserPage(user))),
+                            onLongPress: bloc.toggleSelected)));
               });
         });
   }

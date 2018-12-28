@@ -1,16 +1,18 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:bloc_test/blocs/bloc_provider.dart';
+import 'package:bloc_test/blocs/search_bloc.dart';
 import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/models/user_stats.dart';
 
-class UsersBloc implements BlocBase {
+class UsersBloc extends SearchBloc {
   final List<User> _users = List<User>();
+  final List<User> _selectedUsers = List<User>();
   int _userIdSeed = 0;
-  String _searchTerm;
   Timer _onlineTimer;
-  bool _multiSelect = false;
 
+  // signal selected user list changes
+  final StreamController<List<User>> _selectedUsersController =
+      StreamController<List<User>>.broadcast();
   // signal user list changes
   final StreamController<List<User>> _usersController =
       StreamController<List<User>>();
@@ -20,8 +22,6 @@ class UsersBloc implements BlocBase {
   // signal user statistics
   final StreamController<UserStats> _userStatsController =
       StreamController<UserStats>();
-  final StreamController<bool> _multiSelectController =
-      StreamController<bool>.broadcast();
 
   UsersBloc() {
     // create users
@@ -38,11 +38,11 @@ class UsersBloc implements BlocBase {
     _onlineTimer = Timer.periodic(Duration(seconds: 1), _onTick);
   }
 
-  bool get multiSelect => _multiSelect;
+  List<User> get selectedUsers => _selectedUsers;
+  Stream<List<User>> get selectedUsersStream => _selectedUsersController.stream;
   Stream<List<User>> get usersStream => _usersController.stream;
   Stream<User> get userStream => _userController.stream;
   Stream<UserStats> get userStatsStream => _userStatsController.stream;
-  Stream<bool> get multiSelectStream => _multiSelectController.stream;
 
   void _onTick(Timer timer) {
     // toggle online/offline state of 10 random users
@@ -64,11 +64,11 @@ class UsersBloc implements BlocBase {
 
   void _updateUsers() {
     // filter users based on search term
-    final users = _searchTerm == null || _searchTerm.isEmpty
+    final users = searchTerm == null || searchTerm.isEmpty
         ? _users
         : _users
             .where((user) =>
-                user.name.toLowerCase().contains(_searchTerm.toLowerCase()))
+                user.name.toLowerCase().contains(searchTerm.toLowerCase()))
             .toList();
 
     // signal listeners
@@ -85,8 +85,14 @@ class UsersBloc implements BlocBase {
         favorite: _users.where((u) => u.favorite).length));
   }
 
+  void _updateSelectedUsers() {
+    _selectedUsers.clear();
+    _selectedUsers.addAll(_users.where((u) => u.selected));
+    _selectedUsersController.sink.add(_selectedUsers);
+  }
+
   void search(String searchTerm) {
-    this._searchTerm = searchTerm;
+    super.search(searchTerm);
     _updateUsers();
   }
 
@@ -100,15 +106,27 @@ class UsersBloc implements BlocBase {
     user.selected = !user.selected;
     _userController.sink.add(user);
 
-    if (user.selected) {
-      if (!_multiSelect) {
-        _multiSelect = true;
-        _multiSelectController.sink.add(_multiSelect);
-      }
-    } else if (_multiSelect && !_users.any((u) => u.selected)) {
-      _multiSelect = false;
-      _multiSelectController.sink.add(_multiSelect);
-    }
+    _updateSelectedUsers();
+  }
+
+  void unselectAll() {
+    _selectedUsers.forEach((u) => u.selected = false);
+    _updateSelectedUsers();
+  }
+
+  void favoriteSelected({bool favorite = true}) {
+    _selectedUsers.forEach((u) {
+      u.favorite = favorite;
+      _userController.sink.add(u);
+    });
+    _updateSelectedUsers();
+    _updateUserStats();
+  }
+
+  void removeSelected() {
+    _users.removeWhere((u) => u.selected);
+    _updateUsers();
+    _updateSelectedUsers();
   }
 
   void addUser() {
@@ -135,8 +153,9 @@ class UsersBloc implements BlocBase {
   }
 
   void dispose() {
+    super.dispose();
     _onlineTimer.cancel();
-    _multiSelectController.close();
+    _selectedUsersController.close();
     _usersController.close();
     _userController.close();
     _userStatsController.close();
