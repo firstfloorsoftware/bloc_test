@@ -19,13 +19,13 @@ class _UserPageState extends BlocState<UserPage, UserBloc> {
   @override
   UserBloc createBloc() {
     return UserBloc(
-        userId: widget.user.id, usersBloc: BlocProvider.of<UsersBloc>(context));
+        user: widget.user, usersBloc: BlocProvider.of<UsersBloc>(context));
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        initialData: widget.user,
+        initialData: bloc.user,
         stream: bloc.userStream,
         builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
           final user = snapshot.data;

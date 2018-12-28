@@ -35,7 +35,7 @@ class UserListView extends StatelessWidget {
                   user: user,
                 ),
                 onDismissed: (direction) {
-                  UserWithIndex removedUser = usersBloc.removeUser(user.id);
+                  UserWithIndex removedUser = usersBloc.removeUser(user);
 
                   // hide current snackbar
                   final scaffold = Scaffold.of(context);

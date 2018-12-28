@@ -5,15 +5,15 @@ import 'package:bloc_test/blocs/users_bloc.dart';
 import 'package:bloc_test/models/user.dart';
 
 class UserBloc implements BlocBase {
-  final String userId;
+  final User user;
   final UsersBloc usersBloc;
   final StreamSubscription<User> _subscription;
   final StreamController<User> _userController = StreamController<User>();
 
-  UserBloc({@required this.userId, @required this.usersBloc})
+  UserBloc({@required this.user, @required this.usersBloc})
       // listen for changes of this user
       : _subscription = usersBloc.userStream
-            .where((user) => user.id == userId)
+            .where((u) => u == user)
             .listen(null) {
     // signal user change
     _subscription.onData((user) {
@@ -24,7 +24,11 @@ class UserBloc implements BlocBase {
   Stream<User> get userStream => _userController.stream;
 
   void toggleFavorite() {
-    usersBloc.toggleFavorite(userId);
+    usersBloc.toggleFavorite(user);
+  }
+
+  void toggleSelect(){
+    usersBloc.toggleSelect(user);
   }
 
   void dispose() {

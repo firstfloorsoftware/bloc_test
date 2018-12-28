@@ -9,6 +9,7 @@ class UsersBloc implements BlocBase {
   int _userIdSeed = 0;
   String _searchTerm;
   Timer _onlineTimer;
+  bool _multiSelect = false;
 
   // signal user list changes
   final StreamController<List<User>> _usersController =
@@ -19,6 +20,8 @@ class UsersBloc implements BlocBase {
   // signal user statistics
   final StreamController<UserStats> _userStatsController =
       StreamController<UserStats>();
+  final StreamController<bool> _multiSelectController =
+      StreamController<bool>.broadcast();
 
   UsersBloc() {
     // create users
@@ -35,9 +38,11 @@ class UsersBloc implements BlocBase {
     _onlineTimer = Timer.periodic(Duration(seconds: 1), _onTick);
   }
 
+  bool get multiSelect => _multiSelect;
   Stream<List<User>> get usersStream => _usersController.stream;
   Stream<User> get userStream => _userController.stream;
   Stream<UserStats> get userStatsStream => _userStatsController.stream;
+  Stream<bool> get multiSelectStream => _multiSelectController.stream;
 
   void _onTick(Timer timer) {
     // toggle online/offline state of 10 random users
@@ -49,19 +54,12 @@ class UsersBloc implements BlocBase {
       final user = _users[index];
 
       // update online state
-      _updateUser(index, user.copyWith(online: !user.online));
+      user.online = !user.online;
+      _userController.sink.add(user);
     }
 
     // update stats once, and not for every user update
     _updateUserStats();
-  }
-
-  void _updateUser(int index, User user) {
-    // update user
-    _users[index] = user;
-
-    // signal update
-    _userController.sink.add(user);
   }
 
   void _updateUsers() {
@@ -83,8 +81,8 @@ class UsersBloc implements BlocBase {
   void _updateUserStats() {
     _userStatsController.sink.add(UserStats(
         count: _users.length,
-        online: _users.where((user) => user.online).length,
-        favorite: _users.where((user) => user.favorite).length));
+        online: _users.where((u) => u.online).length,
+        favorite: _users.where((u) => u.favorite).length));
   }
 
   void search(String searchTerm) {
@@ -92,14 +90,24 @@ class UsersBloc implements BlocBase {
     _updateUsers();
   }
 
-  void toggleFavorite(String userId) {
-    final index = _users.indexWhere((user) => user.id == userId);
-    if (index != -1) {
-      final user = _users[index];
-      // update user
-      _updateUser(index, user.copyWith(favorite: !user.favorite));
-      // update stats
-      _updateUserStats();
+  void toggleFavorite(User user) {
+    user.favorite = !user.favorite;
+    _userController.sink.add(user);
+    _updateUserStats();
+  }
+
+  void toggleSelect(User user) {
+    user.selected = !user.selected;
+    _userController.sink.add(user);
+
+    if (user.selected) {
+      if (!_multiSelect) {
+        _multiSelect = true;
+        _multiSelectController.sink.add(_multiSelect);
+      }
+    } else if (_multiSelect && !_users.any((u) => u.selected)) {
+      _multiSelect = false;
+      _multiSelectController.sink.add(_multiSelect);
     }
   }
 
@@ -116,10 +124,10 @@ class UsersBloc implements BlocBase {
     _updateUsers();
   }
 
-  UserWithIndex removeUser(String userId) {
-    final index = _users.indexWhere((user) => user.id == userId);
+  UserWithIndex removeUser(User user) {
+    final index = _users.indexOf(user);
     if (index != -1) {
-      final user = _users.removeAt(index);
+      _users.removeAt(index);
       _updateUsers();
       return UserWithIndex(user: user, index: index);
     }
@@ -128,6 +136,7 @@ class UsersBloc implements BlocBase {
 
   void dispose() {
     _onlineTimer.cancel();
+    _multiSelectController.close();
     _usersController.close();
     _userController.close();
     _userStatsController.close();
