@@ -58,7 +58,7 @@ class UserListView extends StatelessWidget {
 
   void onDismissed(BuildContext context, User user) {
     final usersBloc = BlocProvider.of<UsersBloc>(context);
-    final removedUser = usersBloc.removeUser(user);
+    usersBloc.removeUser(user);
 
     // hide current snackbar
     final scaffold = Scaffold.of(context);
@@ -70,7 +70,7 @@ class UserListView extends StatelessWidget {
       action: SnackBarAction(
         label: 'Undo',
         onPressed: () =>
-            usersBloc.insertUser(removedUser.index, removedUser.user),
+            usersBloc.addUser(user: user),
       ),
     );
     scaffold.showSnackBar(snackBar);

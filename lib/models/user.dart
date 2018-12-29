@@ -14,10 +14,3 @@ class User {
       this.favorite = false,
       this.selected = false});
 }
-
-class UserWithIndex {
-  final User user;
-  final int index;
-
-  const UserWithIndex({@required this.user, @required this.index});
-}

@@ -26,8 +26,7 @@ class UsersBloc extends SearchBloc {
   UsersBloc() {
     // create users
     for (var i = 0; i < 100; i++) {
-      final id = i.toString();
-      _users.add(User(id: id, name: 'User $id'));
+      _users.add(createUser());
     }
     _userIdSeed = _users.length;
 
@@ -38,7 +37,8 @@ class UsersBloc extends SearchBloc {
     _onlineTimer = Timer.periodic(Duration(seconds: 1), _onTick);
   }
 
-  ValueStream<List<User>> get selectedUsers => _selectedUsersController.valueStream;
+  ValueStream<List<User>> get selectedUsers =>
+      _selectedUsersController.valueStream;
   Stream<List<User>> get users => _usersController.stream;
   Stream<User> get user => _userController.stream;
   Stream<UserStats> get userStats => _userStatsController.stream;
@@ -67,8 +67,8 @@ class UsersBloc extends SearchBloc {
     final users = term == null || term.isEmpty
         ? _users
         : _users
-            .where((user) =>
-                user.name.toLowerCase().contains(term.toLowerCase()))
+            .where(
+                (user) => user.name.toLowerCase().contains(term.toLowerCase()))
             .toList();
 
     // signal listeners
@@ -122,33 +122,43 @@ class UsersBloc extends SearchBloc {
     _updateUserStats();
   }
 
-  void removeSelected() {
+  List<User> removeSelected() {
+    final selected = _users.where((u) => u.selected).toList();
     _users.removeWhere((u) => u.selected);
     _updateUsers();
     _updateSelectedUsers();
+
+    return selected;
   }
 
-  void addUser() {
-    final id = (_userIdSeed++).toString();
-    final user = User(id: id, name: 'User $id');
-
-    _users.add(user);
-    _updateUsers();
+  User createUser() {
+    final id = (_userIdSeed++).toString().padLeft(3, '0');
+    return User(id: id, name: 'User $id');
   }
 
-  void insertUser(int index, User user) {
-    _users.insert(index, user);
-    _updateUsers();
-  }
+  void addUser({User user}) {
+    user = user ?? createUser();
 
-  UserWithIndex removeUser(User user) {
-    final index = _users.indexOf(user);
-    if (index != -1) {
-      _users.removeAt(index);
-      _updateUsers();
-      return UserWithIndex(user: user, index: index);
+    // make sure user is unselected
+    user.selected = false;
+
+    // insert user at sorted location
+    int index = _users.indexWhere((u) => u.name.compareTo(user.name) >= 0);
+    if (index == -1) {
+      _users.add(user);
+    } else {
+      _users.insert(index, user);
     }
-    return null;
+    _updateUsers();
+  }
+
+  void removeUser(User user) {
+    if (_users.remove(user)) {
+      _updateUsers();
+      if (user.selected) {
+        _updateSelectedUsers();
+      }
+    }
   }
 
   void dispose() {

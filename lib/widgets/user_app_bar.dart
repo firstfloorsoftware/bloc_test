@@ -26,7 +26,7 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
 
                 if (selectedUsers != null && selectedUsers.isNotEmpty) {
                   final noFavoriteSelected =
-                    selectedUsers.any((u) => !u.favorite);
+                      selectedUsers.any((u) => !u.favorite);
                   // multi-select mode with favorite and remove actions
                   return AppBar(
                     title: Text('${selectedUsers.length}'),
@@ -42,7 +42,7 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
                               favorite: noFavoriteSelected)),
                       IconButton(
                           icon: Icon(Icons.delete),
-                          onPressed: usersBloc.removeSelected)
+                          onPressed: () => onRemoveSelected(context))
                     ],
                   );
                 } else if (searchTerm != null) {
@@ -69,5 +69,26 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
                 }
               });
         });
+  }
+
+  void onRemoveSelected(BuildContext context) {
+    final usersBloc = BlocProvider.of<UsersBloc>(context);
+    final users = usersBloc.removeSelected();
+
+    // hide current snackbar
+    final scaffold = Scaffold.of(context);
+    scaffold.hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
+
+    // display snackbar
+    final snackBar = SnackBar(
+      content:
+          Text('${users.length} user${users.length == 1 ? '' : 's'} removed'),
+      action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () =>
+              // re-add removed users
+              users.forEach((u) => usersBloc.addUser(user: u))),
+    );
+    scaffold.showSnackBar(snackBar);
   }
 }
