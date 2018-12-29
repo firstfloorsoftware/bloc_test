@@ -6,7 +6,7 @@ import 'package:bloc_test/models/user_stats.dart';
 
 class UsersBloc extends SearchBloc {
   final List<User> _users = List<User>();
-  final List<User> _selectedUsers = List<User>();
+  List<User> _selectedUsers;
   int _userIdSeed = 0;
   Timer _onlineTimer;
 
@@ -55,7 +55,7 @@ class UsersBloc extends SearchBloc {
 
       // update online state
       user.online = !user.online;
-      _userController.sink.add(user);
+      _userController.add(user);
     }
 
     // update stats once, and not for every user update
@@ -72,23 +72,22 @@ class UsersBloc extends SearchBloc {
             .toList();
 
     // signal listeners
-    _usersController.sink.add(users);
+    _usersController.add(users);
 
     // update stats
     _updateUserStats();
   }
 
   void _updateUserStats() {
-    _userStatsController.sink.add(UserStats(
+    _userStatsController.add(UserStats(
         count: _users.length,
         online: _users.where((u) => u.online).length,
         favorite: _users.where((u) => u.favorite).length));
   }
 
   void _updateSelectedUsers() {
-    _selectedUsers.clear();
-    _selectedUsers.addAll(_users.where((u) => u.selected));
-    _selectedUsersController.sink.add(_selectedUsers);
+    _selectedUsers = _users.where((u) => u.selected).toList();
+    _selectedUsersController.add(_selectedUsers);
   }
 
   void search(String searchTerm) {
@@ -98,26 +97,26 @@ class UsersBloc extends SearchBloc {
 
   void toggleFavorite(User user) {
     user.favorite = !user.favorite;
-    _userController.sink.add(user);
+    _userController.add(user);
     _updateUserStats();
   }
 
   void toggleSelected(User user) {
     user.selected = !user.selected;
-    _userController.sink.add(user);
+    _userController.add(user);
 
     _updateSelectedUsers();
   }
 
   void unselectAll() {
-    _selectedUsers.forEach((u) => u.selected = false);
+    _users.where((u) => u.selected).forEach((u) => u.selected = false);
     _updateSelectedUsers();
   }
 
   void favoriteSelected({bool favorite = true}) {
-    _selectedUsers.forEach((u) {
+    _users.where((u) => u.selected).forEach((u) {
       u.favorite = favorite;
-      _userController.sink.add(u);
+      _userController.add(u);
     });
     _updateSelectedUsers();
     _updateUserStats();

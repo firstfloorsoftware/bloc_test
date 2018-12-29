@@ -35,7 +35,7 @@ class _UserListItemState extends BlocState<UserListItem, UserBloc> {
               initialData: bloc.usersBloc.selectedUsers,
               stream: bloc.usersBloc.selectedUsersStream,
               builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
-                final selectedUsers = snapshot.data;
+                final selecting = snapshot.hasData && snapshot.data.isNotEmpty;
 
                 return Container(
                     color: user.selected
@@ -52,7 +52,7 @@ class _UserListItemState extends BlocState<UserListItem, UserBloc> {
                             ]),
                             leading: SelectableCircleAvatar(
                                 icon: Icon(Icons.person),
-                                selecting: selectedUsers.isNotEmpty,
+                                selecting: selecting,
                                 selected: user.selected,
                                 onPressed: bloc.toggleSelected),
                             trailing: IconButton(
@@ -60,8 +60,8 @@ class _UserListItemState extends BlocState<UserListItem, UserBloc> {
                                     ? Icon(Icons.favorite, color: Colors.red)
                                     : Icon(Icons.favorite_border),
                                 onPressed:
-                                    selectedUsers.isNotEmpty ? null : bloc.toggleFavorite),
-                            onTap: selectedUsers.isNotEmpty
+                                    selecting ? null : bloc.toggleFavorite),
+                            onTap: selecting
                                 ? bloc.toggleSelected
                                 : () => Navigator.of(context).push(
                                     MaterialPageRoute(

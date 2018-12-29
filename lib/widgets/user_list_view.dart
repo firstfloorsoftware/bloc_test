@@ -27,7 +27,7 @@ class UserListView extends StatelessWidget {
                         AsyncSnapshot<List<User>> snapshot) {
                       final selectedUsers = snapshot.data;
 
-                      return selectedUsers.isNotEmpty
+                      return selectedUsers != null && selectedUsers.isNotEmpty
                           // not dismissable in multi-select mode
                           ? UserListItem(
                               user: user,

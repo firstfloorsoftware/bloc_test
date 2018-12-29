@@ -23,10 +23,10 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
               stream: usersBloc.searchTermStream,
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 final searchTerm = snapshot.data;
-                final selectedNoFavorite =
-                    selectedUsers.any((u) => !u.favorite);
 
-                if (selectedUsers.isNotEmpty) {
+                if (selectedUsers != null && selectedUsers.isNotEmpty) {
+                  final noFavoriteSelected =
+                    selectedUsers.any((u) => !u.favorite);
                   // multi-select mode with favorite and remove actions
                   return AppBar(
                     title: Text('${selectedUsers.length}'),
@@ -35,11 +35,11 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
                         onPressed: usersBloc.unselectAll),
                     actions: <Widget>[
                       IconButton(
-                          icon: Icon(selectedNoFavorite
+                          icon: Icon(noFavoriteSelected
                               ? Icons.favorite
                               : Icons.favorite_border),
                           onPressed: () => usersBloc.favoriteSelected(
-                              favorite: selectedNoFavorite)),
+                              favorite: noFavoriteSelected)),
                       IconButton(
                           icon: Icon(Icons.delete),
                           onPressed: usersBloc.removeSelected)

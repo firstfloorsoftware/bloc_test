@@ -11,7 +11,7 @@ class SearchBloc implements BlocBase {
 
   void search(String searchTerm) {
     _searchTerm = searchTerm;
-    _searchTermController.sink.add(searchTerm);
+    _searchTermController.add(searchTerm);
   }
 
   void dispose() {

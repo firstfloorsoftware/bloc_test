@@ -17,7 +17,7 @@ class UserBloc implements BlocBase {
             .listen(null) {
     // signal user change
     _subscription.onData((user) {
-      _userController.sink.add(user);
+      _userController.add(user);
     });
   }
 
