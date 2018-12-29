@@ -18,7 +18,7 @@ class UsersPage extends StatelessWidget {
             Padding(
                 padding: EdgeInsets.all(16),
                 child: StreamBuilder(
-                    stream: usersBloc.userStatsStream,
+                    stream: usersBloc.userStats,
                     builder: (BuildContext context,
                             AsyncSnapshot<UserStats> snapshot) =>
                         UserStatsText(snapshot.data)))

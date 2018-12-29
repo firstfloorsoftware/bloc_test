@@ -13,14 +13,14 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
     final usersBloc = BlocProvider.of<UsersBloc>(context);
 
     return StreamBuilder(
-        initialData: usersBloc.selectedUsers,
-        stream: usersBloc.selectedUsersStream,
+        initialData: usersBloc.selectedUsers.value,
+        stream: usersBloc.selectedUsers.stream,
         builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
           final selectedUsers = snapshot.data;
 
           return StreamBuilder(
-              initialData: usersBloc.searchTerm,
-              stream: usersBloc.searchTermStream,
+              initialData: usersBloc.searchTerm.value,
+              stream: usersBloc.searchTerm.stream,
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 final searchTerm = snapshot.data;
 
@@ -49,7 +49,7 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
                   // search mode
                   return AppBar(
                       title: SearchTextField(
-                          searchTerm: usersBloc.searchTerm,
+                          searchTerm: usersBloc.searchTerm.value,
                           onChanged: usersBloc.search),
                       leading: IconButton(
                         icon: Icon(Icons.clear),

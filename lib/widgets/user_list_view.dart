@@ -10,7 +10,7 @@ class UserListView extends StatelessWidget {
     final usersBloc = BlocProvider.of<UsersBloc>(context);
 
     return StreamBuilder(
-        stream: usersBloc.usersStream,
+        stream: usersBloc.users,
         builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
@@ -21,8 +21,8 @@ class UserListView extends StatelessWidget {
                 final user = snapshot.data[index];
 
                 return StreamBuilder(
-                    initialData: usersBloc.selectedUsers,
-                    stream: usersBloc.selectedUsersStream,
+                    initialData: usersBloc.selectedUsers.value,
+                    stream: usersBloc.selectedUsers.stream,
                     builder: (BuildContext context,
                         AsyncSnapshot<List<User>> snapshot) {
                       final selectedUsers = snapshot.data;

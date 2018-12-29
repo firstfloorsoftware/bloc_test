@@ -3,20 +3,20 @@ import 'dart:math';
 import 'package:bloc_test/blocs/search_bloc.dart';
 import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/models/user_stats.dart';
+import 'package:bloc_test/blocs/value_stream.dart';
 
 class UsersBloc extends SearchBloc {
   final List<User> _users = List<User>();
-  List<User> _selectedUsers;
   int _userIdSeed = 0;
   Timer _onlineTimer;
 
-  // signal selected user list changes
-  final StreamController<List<User>> _selectedUsersController =
-      StreamController<List<User>>.broadcast();
+  // broadcast selected user list changes
+  final ValueStreamController<List<User>> _selectedUsersController =
+      ValueStreamController<List<User>>.broadcast();
   // signal user list changes
   final StreamController<List<User>> _usersController =
       StreamController<List<User>>();
-  // signal user changes
+  // broadcast user changes
   final StreamController<User> _userController =
       StreamController<User>.broadcast();
   // signal user statistics
@@ -38,11 +38,10 @@ class UsersBloc extends SearchBloc {
     _onlineTimer = Timer.periodic(Duration(seconds: 1), _onTick);
   }
 
-  List<User> get selectedUsers => _selectedUsers;
-  Stream<List<User>> get selectedUsersStream => _selectedUsersController.stream;
-  Stream<List<User>> get usersStream => _usersController.stream;
-  Stream<User> get userStream => _userController.stream;
-  Stream<UserStats> get userStatsStream => _userStatsController.stream;
+  ValueStream<List<User>> get selectedUsers => _selectedUsersController.valueStream;
+  Stream<List<User>> get users => _usersController.stream;
+  Stream<User> get user => _userController.stream;
+  Stream<UserStats> get userStats => _userStatsController.stream;
 
   void _onTick(Timer timer) {
     // toggle online/offline state of 10 random users
@@ -64,11 +63,12 @@ class UsersBloc extends SearchBloc {
 
   void _updateUsers() {
     // filter users based on search term
-    final users = searchTerm == null || searchTerm.isEmpty
+    final term = searchTerm.value;
+    final users = term == null || term.isEmpty
         ? _users
         : _users
             .where((user) =>
-                user.name.toLowerCase().contains(searchTerm.toLowerCase()))
+                user.name.toLowerCase().contains(term.toLowerCase()))
             .toList();
 
     // signal listeners
@@ -86,8 +86,8 @@ class UsersBloc extends SearchBloc {
   }
 
   void _updateSelectedUsers() {
-    _selectedUsers = _users.where((u) => u.selected).toList();
-    _selectedUsersController.add(_selectedUsers);
+    final selectedUsers = _users.where((u) => u.selected).toList();
+    _selectedUsersController.add(selectedUsers);
   }
 
   void search(String searchTerm) {

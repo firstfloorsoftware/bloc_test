@@ -25,8 +25,8 @@ class _UserPageState extends BlocState<UserPage, UserBloc> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        initialData: bloc.user,
-        stream: bloc.userStream,
+        initialData: bloc.user.value,
+        stream: bloc.user.stream,
         builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
           final user = snapshot.data;
           return Scaffold(

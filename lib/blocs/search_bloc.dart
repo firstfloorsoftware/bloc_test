@@ -1,16 +1,13 @@
-import 'dart:async';
 import 'package:bloc_test/blocs/bloc_provider.dart';
+import 'package:bloc_test/blocs/value_stream.dart';
 
 class SearchBloc implements BlocBase {
-  final StreamController<String> _searchTermController =
-      StreamController<String>();
-  String _searchTerm;
+  final ValueStreamController<String> _searchTermController =
+      ValueStreamController<String>();
 
-  String get searchTerm => _searchTerm;
-  Stream<String> get searchTermStream => _searchTermController.stream;
+  ValueStream<String> get searchTerm => _searchTermController.valueStream;
 
   void search(String searchTerm) {
-    _searchTerm = searchTerm;
     _searchTermController.add(searchTerm);
   }
 

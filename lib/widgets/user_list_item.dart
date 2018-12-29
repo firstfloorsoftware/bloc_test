@@ -26,14 +26,14 @@ class _UserListItemState extends BlocState<UserListItem, UserBloc> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        initialData: widget.user,
-        stream: bloc.userStream,
+        initialData: bloc.user.value,
+        stream: bloc.user.stream,
         builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
           final user = snapshot.data;
 
           return StreamBuilder(
-              initialData: bloc.usersBloc.selectedUsers,
-              stream: bloc.usersBloc.selectedUsersStream,
+              initialData: bloc.usersBloc.selectedUsers.value,
+              stream: bloc.usersBloc.selectedUsers.stream,
               builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
                 final selecting = snapshot.hasData && snapshot.data.isNotEmpty;
 
