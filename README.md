@@ -10,7 +10,7 @@ The app implements the following features:
   - slide to remove single user with undo
   - favorite / unfavorite button
 - multi-select mode (long-press and icon tap)
-  - selection counter, and cancel multi-select mode
+  - selection counter
   - favorite multiple users
   - delete multiple users with undo
 - searchbar for filtering users
