@@ -1,32 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:bloc_test/blocs/bloc_provider.dart';
-import 'package:bloc_test/blocs/bloc_state.dart';
-import 'package:bloc_test/blocs/user_bloc.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
 import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/widgets/online_indicator.dart';
 
-class UserPage extends StatefulWidget {
+class UserPage extends StatelessWidget {
   final User user;
 
   const UserPage(this.user);
 
   @override
-  _UserPageState createState() => _UserPageState();
-}
-
-class _UserPageState extends BlocState<UserPage, UserBloc> {
-  @override
-  UserBloc createBloc() {
-    return UserBloc(
-        user: widget.user, usersBloc: BlocProvider.of<UsersBloc>(context));
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final bloc = BlocProvider.of<UsersBloc>(context);
     return StreamBuilder(
-        initialData: bloc.user.value,
-        stream: bloc.user.stream,
+        initialData: user,
+        stream: bloc.user.where((u) => u.id == user.id),
         builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
           final user = snapshot.data;
           return Scaffold(
@@ -54,7 +42,7 @@ class _UserPageState extends BlocState<UserPage, UserBloc> {
                       icon: user.favorite
                           ? Icon(Icons.favorite, color: Colors.red)
                           : Icon(Icons.favorite_border),
-                      onPressed: bloc.toggleFavorite)
+                      onPressed: () => bloc.toggleFavorite(user))
                 ],
               ));
         });

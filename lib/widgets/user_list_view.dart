@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bloc_test/blocs/bloc_provider.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
+import 'package:bloc_test/models/selection_state.dart';
 import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/widgets/user_list_item.dart';
 
@@ -21,13 +22,13 @@ class UserListView extends StatelessWidget {
                 final user = snapshot.data[index];
 
                 return StreamBuilder(
-                    initialData: usersBloc.selectedUsers.value,
-                    stream: usersBloc.selectedUsers.stream,
+                    initialData: usersBloc.selectionState.value,
+                    stream: usersBloc.selectionState,
                     builder: (BuildContext context,
-                        AsyncSnapshot<List<User>> snapshot) {
-                      final selectedUsers = snapshot.data;
+                        AsyncSnapshot<SelectionState> snapshot) {
+                      final selectionState = snapshot.data;
 
-                      return selectedUsers != null && selectedUsers.isNotEmpty
+                      return selectionState.isMultiSelect
                           // not dismissable in multi-select mode
                           ? UserListItem(
                               user: user,

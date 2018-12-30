@@ -1,18 +1,22 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:bloc_test/blocs/search_bloc.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:bloc_test/blocs/bloc_provider.dart';
+import 'package:bloc_test/models/selection_state.dart';
 import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/models/user_stats.dart';
-import 'package:bloc_test/blocs/value_stream.dart';
 
-class UsersBloc extends SearchBloc {
+class UsersBloc extends BlocBase {
   final List<User> _users = List<User>();
   int _userIdSeed = 0;
   Timer _onlineTimer;
 
-  // broadcast selected user list changes
-  final ValueStreamController<List<User>> _selectedUsersController =
-      ValueStreamController<List<User>>.broadcast();
+  // broadcast search term
+  final BehaviorSubject<String> _searchTermController =
+      BehaviorSubject<String>();
+  // broadcast selection state changes
+  final BehaviorSubject<SelectionState> _selectionStateController =
+      BehaviorSubject<SelectionState>(seedValue: SelectionState());
   // signal user list changes
   final StreamController<List<User>> _usersController =
       StreamController<List<User>>();
@@ -34,11 +38,12 @@ class UsersBloc extends SearchBloc {
     search(null);
 
     // start a timer to emulate online/offline behavior
-    _onlineTimer = Timer.periodic(Duration(seconds: 1), _onTick);
+    //_onlineTimer = Timer.periodic(Duration(seconds: 1), _onTick);
   }
 
-  ValueStream<List<User>> get selectedUsers =>
-      _selectedUsersController.valueStream;
+  ValueObservable<String> get searchTerm => _searchTermController.stream;
+  ValueObservable<SelectionState> get selectionState =>
+      _selectionStateController.stream;
   Stream<List<User>> get users => _usersController.stream;
   Stream<User> get user => _userController.stream;
   Stream<UserStats> get userStats => _userStatsController.stream;
@@ -85,13 +90,17 @@ class UsersBloc extends SearchBloc {
         favorite: _users.where((u) => u.favorite).length));
   }
 
-  void _updateSelectedUsers() {
+  void _updateSelectionState() {
     final selectedUsers = _users.where((u) => u.selected).toList();
-    _selectedUsersController.add(selectedUsers);
+    final state = SelectionState(
+        count: selectedUsers.length,
+        favoriteCount: selectedUsers.where((u) => u.favorite).length);
+
+    _selectionStateController.add(state);
   }
 
   void search(String searchTerm) {
-    super.search(searchTerm);
+    _searchTermController.add(searchTerm);
     _updateUsers();
   }
 
@@ -105,12 +114,12 @@ class UsersBloc extends SearchBloc {
     user.selected = !user.selected;
     _userController.add(user);
 
-    _updateSelectedUsers();
+    _updateSelectionState();
   }
 
   void unselectAll() {
     _users.where((u) => u.selected).forEach((u) => u.selected = false);
-    _updateSelectedUsers();
+    _updateSelectionState();
   }
 
   void favoriteSelected({bool favorite = true}) {
@@ -118,7 +127,7 @@ class UsersBloc extends SearchBloc {
       u.favorite = favorite;
       _userController.add(u);
     });
-    _updateSelectedUsers();
+    _updateSelectionState();
     _updateUserStats();
   }
 
@@ -126,7 +135,7 @@ class UsersBloc extends SearchBloc {
     final selected = _users.where((u) => u.selected).toList();
     _users.removeWhere((u) => u.selected);
     _updateUsers();
-    _updateSelectedUsers();
+    _updateSelectionState();
 
     return selected;
   }
@@ -156,15 +165,15 @@ class UsersBloc extends SearchBloc {
     if (_users.remove(user)) {
       _updateUsers();
       if (user.selected) {
-        _updateSelectedUsers();
+        _updateSelectionState();
       }
     }
   }
 
   void dispose() {
-    super.dispose();
     _onlineTimer.cancel();
-    _selectedUsersController.close();
+    _searchTermController.close();
+    _selectionStateController.close();
     _usersController.close();
     _userController.close();
     _userStatsController.close();

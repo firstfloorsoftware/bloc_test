@@ -1,41 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:bloc_test/blocs/bloc_provider.dart';
-import 'package:bloc_test/blocs/bloc_state.dart';
-import 'package:bloc_test/blocs/user_bloc.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
+import 'package:bloc_test/models/selection_state.dart';
 import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/pages/user_page.dart';
 import 'package:bloc_test/widgets/online_indicator.dart';
 import 'package:bloc_test/widgets/selectable_circle_avatar.dart';
 
-class UserListItem extends StatefulWidget {
+class UserListItem extends StatelessWidget {
   final User user;
   const UserListItem({@required this.user, Key key}) : super(key: key);
 
   @override
-  _UserListItemState createState() => _UserListItemState();
-}
-
-class _UserListItemState extends BlocState<UserListItem, UserBloc> {
-  @override
-  UserBloc createBloc() {
-    return UserBloc(
-        user: widget.user, usersBloc: BlocProvider.of<UsersBloc>(context));
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final bloc = BlocProvider.of<UsersBloc>(context);
     return StreamBuilder(
-        initialData: bloc.user.value,
-        stream: bloc.user.stream,
+        initialData: user,
+        stream: bloc.user.where((u) => u.id == user.id),
         builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
           final user = snapshot.data;
 
           return StreamBuilder(
-              initialData: bloc.usersBloc.selectedUsers.value,
-              stream: bloc.usersBloc.selectedUsers.stream,
-              builder: (BuildContext context, AsyncSnapshot<List<User>> snapshot) {
-                final selecting = snapshot.hasData && snapshot.data.isNotEmpty;
+              initialData: bloc.selectionState.value,
+              stream: bloc.selectionState,
+              builder:
+                  (BuildContext context, AsyncSnapshot<SelectionState> snapshot) {
+                final selectionState = snapshot.data;
 
                 return Container(
                     color: user.selected
@@ -52,21 +42,22 @@ class _UserListItemState extends BlocState<UserListItem, UserBloc> {
                             ]),
                             leading: SelectableCircleAvatar(
                                 icon: Icon(Icons.person),
-                                selecting: selecting,
+                                selecting: selectionState.isMultiSelect,
                                 selected: user.selected,
-                                onPressed: bloc.toggleSelected),
+                                onPressed: () => bloc.toggleSelected(user)),
                             trailing: IconButton(
                                 icon: user.favorite
                                     ? Icon(Icons.favorite, color: Colors.red)
                                     : Icon(Icons.favorite_border),
-                                onPressed:
-                                    selecting ? null : bloc.toggleFavorite),
-                            onTap: selecting
-                                ? bloc.toggleSelected
+                                onPressed: selectionState.isMultiSelect
+                                    ? null
+                                    : () => bloc.toggleFavorite(user)),
+                            onTap: selectionState.isMultiSelect
+                                ? () => bloc.toggleSelected(user)
                                 : () => Navigator.of(context).push(
                                     MaterialPageRoute(
                                         builder: (context) => UserPage(user))),
-                            onLongPress: bloc.toggleSelected)));
+                            onLongPress: () => bloc.toggleSelected(user))));
               });
         });
   }
