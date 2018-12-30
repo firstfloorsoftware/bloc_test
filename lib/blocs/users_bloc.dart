@@ -38,7 +38,7 @@ class UsersBloc extends BlocBase {
     search(null);
 
     // start a timer to emulate online/offline behavior
-    //_onlineTimer = Timer.periodic(Duration(seconds: 1), _onTick);
+    _onlineTimer = Timer.periodic(Duration(seconds: 1), _onTick);
   }
 
   ValueObservable<String> get searchTerm => _searchTermController.stream;
