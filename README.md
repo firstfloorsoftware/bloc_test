@@ -18,6 +18,8 @@ The app implements the following features:
   - online status indicator per user
   - user statistics
 
+![Gif](https://github.com/firstfloorsoftware/bloc_test/blob/master/lib/resources/bloctest.gif)
+
 ## BLoC
 Proper separation of concerns by using the Business Logic Component pattern. Heavily relies on streams to notify the UI of changes in the business layer. No 3rd-party package dependencies, just plain Flutter.
 
