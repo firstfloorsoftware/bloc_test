@@ -23,8 +23,8 @@ class UserListItem extends StatelessWidget {
           return StreamBuilder(
               initialData: bloc.selectionState.value,
               stream: bloc.selectionState,
-              builder:
-                  (BuildContext context, AsyncSnapshot<SelectionState> snapshot) {
+              builder: (BuildContext context,
+                  AsyncSnapshot<SelectionState> snapshot) {
                 final selectionState = snapshot.data;
 
                 return Container(

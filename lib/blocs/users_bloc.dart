@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:rxdart/rxdart.dart';
 import 'package:bloc_test/blocs/bloc_provider.dart';
+import 'package:bloc_test/blocs/value_stream.dart';
 import 'package:bloc_test/models/selection_state.dart';
 import 'package:bloc_test/models/user.dart';
 import 'package:bloc_test/models/user_stats.dart';
@@ -12,11 +12,11 @@ class UsersBloc extends BlocBase {
   Timer _onlineTimer;
 
   // broadcast search term
-  final BehaviorSubject<String> _searchTermController =
-      BehaviorSubject<String>();
+  final ValueStreamController<String> _searchTermController =
+      ValueStreamController<String>.broadcast();
   // broadcast selection state changes
-  final BehaviorSubject<SelectionState> _selectionStateController =
-      BehaviorSubject<SelectionState>(seedValue: SelectionState());
+  final ValueStreamController<SelectionState> _selectionStateController =
+      ValueStreamController<SelectionState>.broadcast(seedValue: SelectionState());
   // signal user list changes
   final StreamController<List<User>> _usersController =
       StreamController<List<User>>();
@@ -41,8 +41,8 @@ class UsersBloc extends BlocBase {
     _onlineTimer = Timer.periodic(Duration(seconds: 1), _onTick);
   }
 
-  ValueObservable<String> get searchTerm => _searchTermController.stream;
-  ValueObservable<SelectionState> get selectionState =>
+  ValueStream<String> get searchTerm => _searchTermController.stream;
+  ValueStream<SelectionState> get selectionState =>
       _selectionStateController.stream;
   Stream<List<User>> get users => _usersController.stream;
   Stream<User> get user => _userController.stream;
