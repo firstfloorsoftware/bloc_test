@@ -19,7 +19,7 @@ The app implements the following features:
   - user statistics
 
 ## BLoC
-Proper separation of concerns by using the Business Logic Component pattern. Heavily relies on streams to notify the UI of changes in the business layer. No 3rd-party package depencendies, just plain Flutter.
+Proper separation of concerns by using the Business Logic Component pattern. Heavily relies on streams to notify the UI of changes in the business layer. No 3rd-party package dependencies, just plain Flutter.
 
 ## Acknowledgements
 Based on the great work of [Didier Boelens](https://www.didierboelens.com/). If you need a proper introduction into BLoC, please do read his article about [Reactive Programming - Streams - BLoC](https://www.didierboelens.com/2018/08/reactive-programming---streams---bloc/).
