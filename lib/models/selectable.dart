@@ -1,0 +1,3 @@
+class Selectable {
+  bool selected;
+}
