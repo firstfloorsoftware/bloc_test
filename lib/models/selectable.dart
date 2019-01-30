@@ -1,3 +1,3 @@
 class Selectable {
-  bool selected;
+  bool selected = false;
 }
