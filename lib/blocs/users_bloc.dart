@@ -13,7 +13,7 @@ class UsersBloc extends BlocBase {
 
   // broadcast search term
   final ValueStreamController<String> _searchTermController =
-      ValueStreamController<String>.broadcast();
+      ValueStreamController<String>();
   // broadcast selection state changes
   final ValueStreamController<SelectionState> _selectionStateController =
       ValueStreamController<SelectionState>.broadcast(seedValue: SelectionState());
