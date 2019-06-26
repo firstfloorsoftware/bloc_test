@@ -11,10 +11,7 @@ class UserStatsText extends StatelessWidget {
     final text = stats == null || stats.count == 0
         ? 'No users found'
         : [
-            if (stats.count > 0)
-              '${stats.count} user${stats.count != 1 ? 's' : ''}'
-            else
-              'No users found',
+            '${stats.count} user${stats.count != 1 ? 's' : ''}',
             if (stats.online > 0) '${stats.online} online',
             if (stats.favorite > 0)
               '${stats.favorite} favorite${stats.favorite != 1 ? 's' : ''}'
