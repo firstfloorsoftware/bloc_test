@@ -11,7 +11,7 @@ class UsersBloc extends BlocBase {
   int _userIdSeed = 0;
   Timer _onlineTimer;
 
-  // broadcast search term
+  // signal search term changes
   final ValueStreamController<String> _searchTermController =
       ValueStreamController<String>();
   // broadcast selection state changes

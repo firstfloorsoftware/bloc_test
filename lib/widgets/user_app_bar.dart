@@ -50,7 +50,7 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
                   // search mode
                   return AppBar(
                       title: SearchTextField(
-                          searchTerm: usersBloc.searchTerm.value,
+                          searchTerm: searchTerm,
                           onChanged: usersBloc.search),
                       leading: IconButton(
                         icon: Icon(Icons.clear),
