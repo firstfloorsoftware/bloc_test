@@ -53,10 +53,10 @@ class UsersBloc extends BlocBase {
     if (_users.length == 0){
       return;
     }
-    // toggle online/offline state of 10 random users
+    // toggle online/offline state of max 10 random users
     final rnd = Random();
 
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < min(_users.length, 10); i++) {
       // get random user
       final index = rnd.nextInt(_users.length);
       final user = _users[index];
