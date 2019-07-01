@@ -21,7 +21,8 @@ class UserPage extends StatelessWidget {
               appBar: AppBar(
                 title: Text(user.name),
               ),
-              body: Column(
+              body: SafeArea(
+                  child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Padding(
@@ -44,7 +45,7 @@ class UserPage extends StatelessWidget {
                           : Icon(Icons.favorite_border),
                       onPressed: () => bloc.toggleFavorite(user))
                 ],
-              ));
+              )));
         });
   }
 }

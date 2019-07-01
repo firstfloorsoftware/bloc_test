@@ -12,7 +12,8 @@ class UsersPage extends StatelessWidget {
     final usersBloc = BlocProvider.of<UsersBloc>(context);
     return Scaffold(
         appBar: UserAppBar(),
-        body: Column(
+        body: SafeArea(
+            child: Column(
           children: <Widget>[
             Expanded(child: UserListView()),
             Padding(
@@ -23,7 +24,7 @@ class UsersPage extends StatelessWidget {
                             AsyncSnapshot<UserStats> snapshot) =>
                         UserStatsText(snapshot.data)))
           ],
-        ),
+        )),
         floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add), onPressed: usersBloc.addUser));
   }
