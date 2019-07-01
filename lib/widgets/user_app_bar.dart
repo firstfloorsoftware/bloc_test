@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc_test/blocs/bloc_provider.dart';
 import 'package:bloc_test/blocs/users_bloc.dart';
@@ -36,6 +37,11 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
                         onPressed: usersBloc.unselectAll),
                     actions: <Widget>[
                       IconButton(
+                          icon: Icon(Icons.done_all),
+                          onPressed: () => selectionState.allSelected
+                              ? usersBloc.unselectAll()
+                              : usersBloc.selectAll()),
+                      IconButton(
                           icon: Icon(favorite
                               ? Icons.favorite
                               : Icons.favorite_border),
@@ -50,8 +56,7 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
                   // search mode
                   return AppBar(
                       title: SearchTextField(
-                          searchTerm: searchTerm,
-                          onChanged: usersBloc.search),
+                          searchTerm: searchTerm, onChanged: usersBloc.search),
                       leading: IconButton(
                         icon: Icon(Icons.clear),
                         onPressed: () {

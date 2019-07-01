@@ -16,7 +16,8 @@ class UsersBloc extends BlocBase {
       ValueStreamController<String>();
   // broadcast selection state changes
   final ValueStreamController<SelectionState> _selectionStateController =
-      ValueStreamController<SelectionState>.broadcast(seedValue: SelectionState());
+      ValueStreamController<SelectionState>.broadcast(
+          seedValue: SelectionState());
   // signal user list changes
   final StreamController<List<User>> _usersController =
       StreamController<List<User>>();
@@ -93,11 +94,22 @@ class UsersBloc extends BlocBase {
   void _updateSelectionState() {
     final selectedUsers = _users.where((u) => u.selected).toList();
     final state = SelectionState(
-        count: selectedUsers.length,
-        favoriteCount: selectedUsers.where((u) => u.favorite).length);
+      count: selectedUsers.length,
+      favoriteCount: selectedUsers.where((u) => u.favorite).length,
+      allSelected: selectedUsers.length == _users.length,
+    );
 
     _selectionStateController.add(state);
   }
+
+  void _selectAll(bool select) {
+    _users.forEach((u) => u.selected = select);
+    _updateSelectionState();
+  }
+
+  void selectAll() => _selectAll(true);
+
+  void unselectAll() => _selectAll(false);
 
   void search(String searchTerm) {
     _searchTermController.add(searchTerm);
@@ -114,11 +126,6 @@ class UsersBloc extends BlocBase {
     user.selected = !user.selected;
     _userController.add(user);
 
-    _updateSelectionState();
-  }
-
-  void unselectAll() {
-    _users.where((u) => u.selected).forEach((u) => u.selected = false);
     _updateSelectionState();
   }
 
