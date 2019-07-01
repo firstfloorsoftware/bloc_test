@@ -42,17 +42,17 @@ class UserListItem extends StatelessWidget {
                             ]),
                             leading: SelectableCircleAvatar(
                                 icon: Icon(Icons.person),
-                                selecting: selectionState.isMultiSelect,
+                                selecting: selectionState.isSelecting,
                                 selected: user.selected,
                                 onPressed: () => bloc.toggleSelected(user)),
                             trailing: IconButton(
                                 icon: user.favorite
                                     ? Icon(Icons.favorite, color: Colors.red)
                                     : Icon(Icons.favorite_border),
-                                onPressed: selectionState.isMultiSelect
+                                onPressed: selectionState.isSelecting
                                     ? null
                                     : () => bloc.toggleFavorite(user)),
-                            onTap: selectionState.isMultiSelect
+                            onTap: selectionState.isSelecting
                                 ? () => bloc.toggleSelected(user)
                                 : () => Navigator.of(context).push(
                                     MaterialPageRoute(

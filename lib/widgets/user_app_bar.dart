@@ -25,7 +25,7 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 final searchTerm = snapshot.data;
 
-                if (selectionState.isMultiSelect) {
+                if (selectionState.isSelecting) {
                   // multi-select mode with favorite and remove actions
                   final favorite =
                       selectionState.favoriteCount != selectionState.count;

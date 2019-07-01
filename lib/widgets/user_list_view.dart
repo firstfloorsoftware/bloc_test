@@ -28,8 +28,8 @@ class UserListView extends StatelessWidget {
                         AsyncSnapshot<SelectionState> snapshot) {
                       final selectionState = snapshot.data;
 
-                      return selectionState.isMultiSelect
-                          // not dismissable in multi-select mode
+                      return selectionState.isSelecting
+                          // not dismissable when selecting
                           ? UserListItem(
                               user: user,
                             )
