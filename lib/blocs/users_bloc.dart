@@ -50,6 +50,9 @@ class UsersBloc extends BlocBase {
   Stream<UserStats> get userStats => _userStatsController.stream;
 
   void _onTick(Timer timer) {
+    if (_users.length == 0){
+      return;
+    }
     // toggle online/offline state of 10 random users
     final rnd = Random();
 
